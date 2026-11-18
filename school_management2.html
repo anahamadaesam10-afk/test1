@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>School Management System</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --surface: #ffffff;
+      --text: #172033;
+      --muted: #718096;
+      --primary: #3157d5;
+      --primary-dark: #2444b5;
+      --border: #e5eaf2;
+      --green: #16865b;
+      --red: #c43d4b;
+      --shadow: 0 12px 35px rgba(24, 39, 75, .07);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .app { min-height: 100vh; }
+    header {
+      background: #172b62;
+      color: white;
+      padding: 22px max(24px, calc((100% - 1200px) / 2));
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .brand { display: flex; align-items: center; gap: 13px; }
+    .logo {
+      width: 43px; height: 43px; border-radius: 13px;
+      background: rgba(255,255,255,.15);
+      display: grid; place-items: center; font-size: 23px;
+    }
+    header h1 { font-size: 19px; margin: 0 0 4px; }
+    header p { margin: 0; color: #c8d3f1; font-size: 12px; }
+    .connection {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; color: #dbe5ff;
+      background: rgba(255,255,255,.1);
+      padding: 9px 12px; border-radius: 20px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #f5c451; }
+    .dot.online { background: #42d69a; }
+    main { max-width: 1200px; margin: 30px auto; padding: 0 22px 45px; }
+    .page-heading {
+      display: flex; justify-content: space-between; align-items: end;
+      gap: 15px; flex-wrap: wrap; margin-bottom: 22px;
+    }
+    .page-heading h2 { margin: 0 0 6px; font-size: 25px; }
+    .page-heading p { margin: 0; color: var(--muted); font-size: 14px; }
+    .api-setting { display: flex; gap: 8px; align-items: center; }
+    .api-setting input { width: 245px; }
+    .stats {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 16px; margin-bottom: 22px;
+    }
+    .stat, .panel {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 15px; box-shadow: var(--shadow);
+    }
+    .stat { padding: 19px 21px; }
+    .stat-label { color: var(--muted); font-size: 13px; }
+    .stat-value { font-size: 27px; font-weight: 700; margin-top: 9px; }
+    .content-grid {
+      display: grid; grid-template-columns: 340px minmax(0, 1fr);
+      gap: 18px; align-items: start;
+    }
+    .panel { padding: 21px; }
+    .panel h3 { margin: 0 0 18px; font-size: 17px; }
+    .field { margin-bottom: 14px; }
+    label { display: block; font-size: 12px; font-weight: 650; margin-bottom: 7px; color: #48556b; }
+    input {
+      width: 100%; border: 1px solid #dce3ee; border-radius: 9px;
+      padding: 11px 12px; font: inherit; font-size: 13px;
+      outline: none; background: white; color: var(--text);
+    }
+    input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(49,87,213,.1); }
+    input:disabled { background: #f2f4f8; color: #7c8798; }
+    button {
+      border: 0; border-radius: 9px; padding: 10px 14px;
+      font: inherit; font-size: 13px; font-weight: 650; cursor: pointer;
+      transition: .15s ease;
+    }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+    .btn-primary { color: white; background: var(--primary); }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-light { color: #34425b; background: #edf1f7; }
+    .btn-light:hover { background: #e2e8f1; }
+    .btn-danger { color: var(--red); background: #fff0f1; }
+    .btn-danger:hover { background: #ffe1e4; }
+    .btn-row { display: flex; gap: 8px; }
+    .btn-row button { flex: 1; }
+    .form-hint { color: var(--muted); font-size: 11px; line-height: 1.5; margin: 12px 0 0; }
+    .toolbar {
+      display: flex; justify-content: space-between; gap: 10px;
+      align-items: center; flex-wrap: wrap; margin-bottom: 15px;
+    }
+    .toolbar h3 { margin: 0; }
+    .search { display: flex; gap: 7px; width: min(100%, 310px); }
+    .search input { min-width: 0; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 570px; }
+    th {
+      text-align: left; color: #78849a; background: #f8faff;
+      font-size: 11px; font-weight: 700; padding: 12px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    td { padding: 13px 10px; border-bottom: 1px solid #edf0f5; font-size: 13px; }
+    tbody tr:last-child td { border-bottom: 0; }
+    .student-name { font-weight: 650; }
+    .grade {
+      display: inline-block; padding: 5px 9px; border-radius: 20px;
+      background: #eaf7f0; color: var(--green); font-size: 11px; font-weight: 700;
+    }
+    .actions { display: flex; gap: 6px; }
+    .actions button { padding: 7px 9px; font-size: 11px; }
+    .empty, .loading { text-align: center; color: var(--muted); padding: 35px 12px; font-size: 13px; }
+    .notice {
+      display: none; margin-bottom: 16px; padding: 12px 14px;
+      border-radius: 10px; font-size: 13px;
+    }
+    .notice.show { display: block; }
+    .notice.success { background: #eaf7f0; color: #126c48; }
+    .notice.error { background: #fff0f1; color: #a52d3b; }
+    .notice.info { background: #edf3ff; color: #2949a6; }
+    .footer-note { text-align: center; color: #98a2b3; font-size: 11px; margin-top: 22px; }
+    @media (max-width: 850px) {
+      .content-grid { grid-template-columns: 1fr; }
+      .stats { gap: 10px; }
+    }
+    @media (max-width: 520px) {
+      main { margin-top: 22px; padding-left: 14px; padding-right: 14px; }
+      .stats { grid-template-columns: 1fr; }
+      .stat { padding: 14px 17px; }
+      .stat-value { font-size: 23px; }
+      .api-setting { width: 100%; }
+      .api-setting input { width: 100%; }
+      .panel { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="logo">🎓</div>
+      <div>
+        <h1>School Management</h1>
+        <p>Student administration dashboard</p>
+      </div>
+    </div>
+    <div class="connection"><span class="dot" id="connectionDot"></span><span id="connectionText">Checking API connection...</span></div>
+  </header>
+
+  <main>
+    <div class="page-heading">
+      <div>
+        <h2>Students Overview</h2>
+        <p>Manage student records through your FastAPI backend.</p>
+      </div>
+      <div class="api-setting">
+        <input id="apiUrl" type="url" value="https://hamada.tailfa40f3.ts.net" aria-label="API base URL">
+        <button class="btn-light" id="saveApiBtn" type="button">Connect</button>
+      </div>
+    </div>
+
+    <div class="notice" id="notice" role="status" aria-live="polite"></div>
+
+    <section class="stats">
+      <div class="stat">
+        <div class="stat-label">Total Students</div>
+        <div class="stat-value" id="totalStudents">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Average Grade</div>
+        <div class="stat-value" id="averageGrade">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Highest Grade</div>
+        <div class="stat-value" id="highestGrade">—</div>
+      </div>
+    </section>
+
+    <section class="content-grid">
+      <div class="panel">
+        <h3 id="formTitle">Add New Student</h3>
+        <form id="studentForm">
+          <div class="field">
+            <label for="studentId">Student ID</label>
+            <input id="studentId" type="number" min="1" step="1" placeholder="e.g. 101" required>
+          </div>
+          <div class="field">
+            <label for="studentName">Full Name</label>
+            <input id="studentName" type="text" maxlength="100" placeholder="Enter student name" required>
+          </div>
+          <div class="field">
+            <label for="studentAge">Age</label>
+            <input id="studentAge" type="number" min="1" step="1" placeholder="e.g. 15" required>
+          </div>
+          <div class="field">
+            <label for="studentGrade">Grade (0–100)</label>
+            <input id="studentGrade" type="number" min="0" max="100" step="0.01" placeholder="e.g. 95.5" required>
+          </div>
+          <div class="btn-row">
+            <button class="btn-primary" id="submitBtn" type="submit">Add Student</button>
+            <button class="btn-light" id="cancelEditBtn" type="button" hidden>Cancel</button>
+          </div>
+        </form>
+        <p class="form-hint">The student ID is required when creating a student. When editing, the ID stays unchanged.</p>
+      </div>
+
+      <div class="panel">
+        <div class="toolbar">
+          <h3>Students List</h3>
+          <div class="search">
+            <input id="searchId" type="number" min="1" step="1" placeholder="Search by student ID">
+            <button class="btn-light" id="searchBtn" type="button">Search</button>
+            <button class="btn-light" id="clearSearchBtn" type="button" title="Show all students">All</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>ID</th><th>NAME</th><th>AGE</th><th>GRADE</th><th>ACTIONS</th></tr>
+            </thead>
+            <tbody id="studentsBody">
+              <tr><td colspan="5" class="loading">Loading students...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    <div class="footer-note">School Management System · Connected to your FastAPI API</div>
+  </main>
+</div>
+
+<script>
+  const apiUrlInput = document.getElementById("apiUrl");
+  const studentsBody = document.getElementById("studentsBody");
+  const notice = document.getElementById("notice");
+  const form = document.getElementById("studentForm");
+  const idInput = document.getElementById("studentId");
+  const nameInput = document.getElementById("studentName");
+  const ageInput = document.getElementById("studentAge");
+  const gradeInput = document.getElementById("studentGrade");
+  const submitBtn = document.getElementById("submitBtn");
+  const cancelEditBtn = document.getElementById("cancelEditBtn");
+  const formTitle = document.getElementById("formTitle");
+
+  let students = [];
+  let editingId = null;
+  let noticeTimer = null;
+
+  function apiBase() {
+    return apiUrlInput.value.trim().replace(/\/+$/, "");
+  }
+
+  function showNotice(message, type = "info") {
+    notice.textContent = message;
+    notice.className = `notice show ${type}`;
+    clearTimeout(noticeTimer);
+    noticeTimer = setTimeout(() => notice.classList.remove("show"), 5000);
+  }
+
+  async function apiRequest(path, options = {}) {
+    const response = await fetch(`${apiBase()}${path}`, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {})
+      }
+    });
+
+    const raw = await response.text();
+    let data = null;
+    if (raw) {
+      try { data = JSON.parse(raw); }
+      catch { data = raw; }
+    }
+
+    if (!response.ok) {
+      let message = `Request failed (${response.status})`;
+      if (data && typeof data === "object" && data.detail) {
+        message = typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail);
+      } else if (typeof data === "string" && data) {
+        message = data;
+      }
+      throw new Error(message);
+    }
+    return data;
+  }
+
+  function setConnection(online) {
+    document.getElementById("connectionDot").classList.toggle("online", online);
+    document.getElementById("connectionText").textContent = online ? "API Connected" : "API Disconnected";
+  }
+
+  function updateStats(list) {
+    document.getElementById("totalStudents").textContent = list.length;
+    if (list.length === 0) {
+      document.getElementById("averageGrade").textContent = "—";
+      document.getElementById("highestGrade").textContent = "—";
+      return;
+    }
+    const grades = list.map(student => Number(student.grade));
+    const average = grades.reduce((sum, grade) => sum + grade, 0) / grades.length;
+    document.getElementById("averageGrade").textContent = `${average.toFixed(1)}%`;
+    document.getElementById("highestGrade").textContent = `${Math.max(...grades).toFixed(1)}%`;
+  }
+
+  function renderStudents(list) {
+    studentsBody.replaceChildren();
+    if (!list.length) {
+      const row = document.createElement("tr");
+      const cell = document.createElement("td");
+      cell.colSpan = 5;
+      cell.className = "empty";
+      cell.textContent = "No students found.";
+      row.appendChild(cell);
+      studentsBody.appendChild(row);
+      return;
+    }
+
+    list.forEach(student => {
+      const row = document.createElement("tr");
+      const values = [student.id, student.name, student.age];
+      values.forEach((value, index) => {
+        const cell = document.createElement("td");
+        cell.textContent = value ?? "";
+        if (index === 1) cell.className = "student-name";
+        row.appendChild(cell);
+      });
+
+      const gradeCell = document.createElement("td");
+      const gradeBadge = document.createElement("span");
+      gradeBadge.className = "grade";
+      gradeBadge.textContent = `${Number(student.grade).toFixed(1)}%`;
+      gradeCell.appendChild(gradeBadge);
+      row.appendChild(gradeCell);
+
+      const actionsCell = document.createElement("td");
+      const actions = document.createElement("div");
+      actions.className = "actions";
+
+      const editButton = document.createElement("button");
+      editButton.className = "btn-light";
+      editButton.textContent = "Edit";
+      editButton.addEventListener("click", () => startEdit(student));
+
+      const deleteButton = document.createElement("button");
+      deleteButton.className = "btn-danger";
+      deleteButton.textContent = "Delete";
+      deleteButton.addEventListener("click", () => deleteStudent(student.id));
+
+      actions.append(editButton, deleteButton);
+      actionsCell.appendChild(actions);
+      row.appendChild(actionsCell);
+      studentsBody.appendChild(row);
+    });
+  }
+
+  async function loadStudents() {
+    studentsBody.innerHTML = '<tr><td colspan="5" class="loading">Loading students...</td></tr>';
+    try {
+      const data = await apiRequest("/students");
+      // The current API returns a list, or the text "Its Empty" when there are no records.
+      students = Array.isArray(data) ? data : [];
+      setConnection(true);
+      updateStats(students);
+      renderStudents(students);
+    } catch (error) {
+      setConnection(false);
+      students = [];
+      updateStats(students);
+      renderStudents([]);
+      showNotice(`Could not load students: ${error.message}`, "error");
+    }
+  }
+
+  function resetForm() {
+    form.reset();
+    editingId = null;
+    idInput.disabled = false;
+    formTitle.textContent = "Add New Student";
+    submitBtn.textContent = "Add Student";
+    cancelEditBtn.hidden = true;
+  }
+
+  function startEdit(student) {
+    editingId = Number(student.id);
+    idInput.value = student.id;
+    idInput.disabled = true;
+    nameInput.value = student.name;
+    ageInput.value = student.age;
+    gradeInput.value = student.grade;
+    formTitle.textContent = `Edit Student #${student.id}`;
+    submitBtn.textContent = "Save Changes";
+    cancelEditBtn.hidden = false;
+    form.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  function validateForm() {
+    const id = Number(idInput.value);
+    const name = nameInput.value.trim();
+    const age = Number(ageInput.value);
+    const grade = Number(gradeInput.value);
+
+    if (editingId === null && (!Number.isInteger(id) || id <= 0)) {
+      throw new Error("Student ID must be a positive whole number.");
+    }
+    if (!name) throw new Error("Student name is required.");
+    if (!Number.isInteger(age) || age <= 0) throw new Error("Age must be a positive whole number.");
+    if (!Number.isFinite(grade) || grade < 0 || grade > 100) {
+      throw new Error("Grade must be between 0 and 100.");
+    }
+    return { id, name, age, grade };
+  }
+
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    let student;
+    try {
+      student = validateForm();
+    } catch (error) {
+      showNotice(error.message, "error");
+      return;
+    }
+
+    submitBtn.disabled = true;
+    try {
+      if (editingId === null) {
+        await apiRequest("/students", {
+          method: "POST",
+          body: JSON.stringify(student)
+        });
+        showNotice("Student added successfully.", "success");
+      } else {
+        const updateData = {
+          name: student.name,
+          age: student.age,
+          grade: student.grade
+        };
+        await apiRequest(`/students/${editingId}`, {
+          method: "PUT",
+          body: JSON.stringify(updateData)
+        });
+        showNotice("Student updated successfully.", "success");
+      }
+      resetForm();
+      await loadStudents();
+    } catch (error) {
+      showNotice(error.message, "error");
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+
+  async function deleteStudent(id) {
+    if (!confirm(`Are you sure you want to delete student #${id}?`)) return;
+    try {
+      await apiRequest(`/students/${id}`, { method: "DELETE" });
+      showNotice(`Student #${id} deleted successfully.`, "success");
+      if (editingId === Number(id)) resetForm();
+      await loadStudents();
+    } catch (error) {
+      showNotice(error.message, "error");
+    }
+  }
+
+  async function searchStudent() {
+    const id = Number(document.getElementById("searchId").value);
+    if (!Number.isInteger(id) || id <= 0) {
+      showNotice("Enter a valid student ID to search.", "error");
+      return;
+    }
+    try {
+      const student = await apiRequest(`/students/${id}`);
+      setConnection(true);
+      renderStudents([student]);
+      showNotice(`Student #${id} found.`, "success");
+    } catch (error) {
+      showNotice(error.message, "error");
+      renderStudents([]);
+    }
+  }
+
+  document.getElementById("searchBtn").addEventListener("click", searchStudent);
+  document.getElementById("searchId").addEventListener("keydown", event => {
+    if (event.key === "Enter") searchStudent();
+  });
+  document.getElementById("clearSearchBtn").addEventListener("click", () => {
+    document.getElementById("searchId").value = "";
+    renderStudents(students);
+  });
+  document.getElementById("saveApiBtn").addEventListener("click", loadStudents);
+  cancelEditBtn.addEventListener("click", resetForm);
+
+  loadStudents();
+</script>
+</body>
+</html>
